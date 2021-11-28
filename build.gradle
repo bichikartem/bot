@@ -5,7 +5,8 @@ plugins {
 }
 
 group = 'ru.ortemb'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.1'
+//todo change to 17
 sourceCompatibility = '16'
 
 repositories {
@@ -13,12 +14,20 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter'
-    implementation 'org.projectlombok:lombok:1.18.20'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.springframework.boot:spring-boot-starter:2.5.6'
+    implementation 'org.projectlombok:lombok:1.18.22'
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:3.0.4'
+    implementation 'org.springframework.boot:spring-boot-starter-web:2.5.6'
     implementation 'org.telegram:telegrambots-spring-boot-starter:5.4.0.1'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.6.0'
+
+    //Database:
+    implementation group: 'org.liquibase', name: 'liquibase-core'
+    runtimeOnly group: 'org.postgresql', name: 'postgresql'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.6'
 }
 
 test {
-    useJUnitPlatform()
+//    useJUnitPlatform()
 }
