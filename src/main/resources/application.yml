@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: ortem-bot
+
+server:
+  port: 0

@@ -1,5 +1,7 @@
 package ru.ortemb.contoratelegram;
 
+import java.util.HashMap;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -8,8 +10,6 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
-import java.util.*;
 
 @Slf4j
 @Component
@@ -67,5 +67,11 @@ public class Bot extends TelegramLongPollingBot {
             }
         }
     }
+
+//    @Scheduled(cron = "*/10 * * * * *")
+//    private void testSend() throws TelegramApiException {
+//                SendMessage message = new SendMessage("85248441", "Hi!");
+//                execute(message);
+//    }
 
 }
