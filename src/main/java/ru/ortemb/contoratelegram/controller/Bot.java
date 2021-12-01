@@ -1,6 +1,7 @@
 package ru.ortemb.contoratelegram.controller;
 
 import java.util.Objects;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,8 +31,16 @@ public class Bot extends TelegramLongPollingBot {
   public void onUpdateReceived(Update update) {
     if (Objects.nonNull(update.getMessage()) && update.getMessage().hasText()) {
       if (update.getMessage().getText().equals("/start")) {
-        //todo check exists
+        Optional<Users> usersOptional = userRepository.findById(update.getMessage().getFrom().getId().toString());
+        if (usersOptional.isPresent()) {
+          Users user = usersOptional.get();
+          user.setBlocked(false);
+          userRepository.save(user);
+          log.info("User id: {} already exists", update.getMessage().getFrom().getId());
+          return;
+        }
         Users newUser = userRepository.save(usersMapper.telegramUserToEntity(update.getMessage().getFrom()));
+        log.info("New User {}, id: {} has add", newUser.getFirstName(), newUser.getId());
         try {
           execute(new SendMessage(newUser.getId(), String.format("Hi %s", newUser.getFirstName())));
         } catch (TelegramApiException e) {
@@ -39,7 +48,13 @@ public class Bot extends TelegramLongPollingBot {
         }
       }
     } else if (Objects.nonNull(update.getMyChatMember()) && update.getMyChatMember().getNewChatMember().getStatus().equals("kicked")) {
-      log.info("USER ID {} BLOCK YOU", update.getMyChatMember().getChat().getId());
+      Optional<Users> optionalUser = userRepository.findById(update.getMyChatMember().getChat().getId().toString());
+      if (optionalUser.isPresent()) {
+        Users user = optionalUser.get();
+        user.setBlocked(true);
+        userRepository.save(user);
+        log.info("USER ID {} BLOCK YOU", user.getId());
+      }
     }
   }
 
@@ -53,8 +68,8 @@ public class Bot extends TelegramLongPollingBot {
     return TOKEN;
   }
 
-  @Scheduled(cron = "0 0 11 * * *", zone = "Europe/Moscow")
-//    @Scheduled(cron = "*/10 * * * * *")
+  @Scheduled(cron = "0 0 8 * * *", zone = "Europe/Moscow")
+//  @Scheduled(cron = "*/10 * * * * *")
   private void send() {
     userRepository.findAll().forEach(users -> {
       try {
