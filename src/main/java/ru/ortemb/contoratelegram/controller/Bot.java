@@ -56,6 +56,12 @@ public class Bot extends TelegramLongPollingBot {
         log.info("USER ID {} BLOCK YOU", user.getId());
       }
     }
+    else if (Objects.nonNull(update.getMyChatMember()) && update.getMyChatMember().getNewChatMember().getStatus().equals("member")) {
+      //todo логика когда добавили в чат (id, type, title)
+    }
+    else if (Objects.nonNull(update.getMyChatMember()) && update.getMyChatMember().getNewChatMember().getStatus().equals("left")) {
+      //todo логика когда удалили из чата
+    }
   }
 
   @Override
@@ -68,7 +74,7 @@ public class Bot extends TelegramLongPollingBot {
     return TOKEN;
   }
 
-  @Scheduled(cron = "0 0 8 * * *", zone = "Europe/Moscow")
+  @Scheduled(cron = "0 0 11 * * *", zone = "Europe/Moscow")
 //  @Scheduled(cron = "*/10 * * * * *")
   private void send() {
     userRepository.findAll().forEach(users -> {
