@@ -3,3 +3,5 @@ databaseChangeLog:
       file: db/changelog/0.0.1/changes/01-init.sql
   - include:
       file: db/changelog/0.0.1/changes/02-add_isBlocked_to_user.sql
+  - include:
+      file: db/changelog/0.0.1/changes/03-new_table_citations.sql
