@@ -1,3 +1,6 @@
+--liquibase formatted sql
+
+--changeset bstrdn:1
 CREATE TABLE IF NOT EXISTS users
 (
     id        varchar not null
@@ -6,3 +9,4 @@ CREATE TABLE IF NOT EXISTS users
     first_name varchar,
     last_name  varchar
 );
+--rollback DROP TABLE users;
