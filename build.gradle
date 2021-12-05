@@ -1,35 +1,36 @@
 plugins {
     id 'org.springframework.boot' version '2.5.6'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'org.liquibase.gradle' version '2.1.0'
     id 'io.freefair.lombok' version '6.2.0'
     id 'java'
 }
 
 group = 'ru.ortemb'
 version = '0.0.1'
-//todo change to 17
-sourceCompatibility = '16'
+sourceCompatibility = '17'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter:2.5.6'
+    implementation 'org.springframework.boot:spring-boot-starter:2.6.1'
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:3.0.4'
-    implementation 'org.springframework.boot:spring-boot-starter-web:2.5.6'
+    implementation 'org.springframework.boot:spring-boot-starter-web:2.6.1'
     implementation 'org.telegram:telegrambots-spring-boot-starter:5.4.0.1'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.6.0'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.6.1'
 
     //Database:
-    implementation group: 'org.liquibase', name: 'liquibase-core'
-    runtimeOnly group: 'org.postgresql', name: 'postgresql'
+    implementation group: 'org.liquibase', name: 'liquibase-core', version: '4.6.1'
+    liquibaseRuntime 'info.picocli:picocli:4.6.1'
+    runtimeOnly group: 'org.postgresql', name: 'postgresql', version: '42.3.1'
 
     //mapstruct
     implementation group: 'org.mapstruct', name: 'mapstruct', version: '1.4.2.Final'
     annotationProcessor("org.mapstruct:mapstruct-processor:1.4.2.Final")
 
-    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.6'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.6.1'
 }
 
 test {
