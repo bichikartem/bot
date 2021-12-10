@@ -1,23 +1,20 @@
-pipeline { 
-    agent any 
-    options {
-//         skipStagesAfterUnstable()
-    }
+pipeline {
+    agent any
+
     stages {
-        stage('Build') { 
-            steps { 
-                sh 'make' 
+        stage('Build') {
+            steps {
+                echo 'Build success'
             }
         }
-        stage('Test'){
+        stage('Test') {
             steps {
-                sh 'make check'
-//                 junit 'reports/**/*.xml' 
+                echo 'Test success'
             }
         }
         stage('Deploy') {
             steps {
-                sh 'make publish'
+                echo 'Deploy success'
             }
         }
     }
