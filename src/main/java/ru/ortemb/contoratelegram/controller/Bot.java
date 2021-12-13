@@ -1,7 +1,10 @@
 package ru.ortemb.contoratelegram.controller;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,8 +14,10 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import ru.ortemb.contoratelegram.data.entity.Citations;
 import ru.ortemb.contoratelegram.data.entity.Users;
 import ru.ortemb.contoratelegram.data.mapper.UsersMapper;
+import ru.ortemb.contoratelegram.data.repository.CitationsRepository;
 import ru.ortemb.contoratelegram.data.repository.UserRepository;
 
 @Slf4j
@@ -20,6 +25,7 @@ import ru.ortemb.contoratelegram.data.repository.UserRepository;
 @RequiredArgsConstructor
 public class Bot extends TelegramLongPollingBot {
 
+  private final CitationsRepository citationsRepository;
   private final UserRepository userRepository;
   private final UsersMapper usersMapper;
   @Value("${telegram.bot.credentials.token}")
@@ -74,14 +80,37 @@ public class Bot extends TelegramLongPollingBot {
     return TOKEN;
   }
 
-  @Scheduled(cron = "0 0 11 * * *", zone = "Europe/Moscow")
+  @Scheduled(cron = "0 0 10 * * *", zone = "Europe/Moscow")
 //  @Scheduled(cron = "*/10 * * * * *")
   private void send() {
-    userRepository.findAll().forEach(users -> {
+
+    Random random = new Random();
+    List<Citations> list = citationsRepository.findAll();
+
+    userRepository.findAll().forEach(user -> {
       try {
-        execute(new SendMessage(users.getId(), "Have a good day!"));
+        String text = list.get(random.nextInt(list.size())).getBody();
+        execute(new SendMessage(user.getId(),
+            String.format("Первая пуля вошла в руку, больно сука...\nВторая в щёку угодила, косой мудила!\n\nТРИ ДНЯ ДО КОРПОРОТИВА!\n\n%s", text)));
       } catch (TelegramApiException e) {
-        log.info("{}. USER {}, ID: {}", e.getMessage(), users.getUserName(), users.getId());
+        log.info("{}. USER {}, ID: {}", e.getMessage(), user.getUserName(), user.getId());
+      }
+    });
+  }
+
+  @Scheduled(cron = "0 0 12 * * *", zone = "Europe/Moscow")
+  private void send2() {
+
+    Random random = new Random();
+    List<Citations> list = citationsRepository.findAll();
+
+    userRepository.findAll().forEach(user -> {
+      try {
+        String text = list.get(random.nextInt(list.size())).getBody();
+        execute(new SendMessage(user.getId(),
+            String.format("В Сб. чебурки наобед, а пока го в MarketPlace.\n\n%s", text)));
+      } catch (TelegramApiException e) {
+        log.info("{}. USER {}, ID: {}", e.getMessage(), user.getUserName(), user.getId());
       }
     });
   }
