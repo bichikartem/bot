@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: cp-telegram-bot
+  cloud:
+    config:
+      uri: http://192.168.88.222:8811
