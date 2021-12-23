@@ -5,3 +5,11 @@ databaseChangeLog:
       file: db/changelog/0.0.1/changes/02-add_isBlocked_to_user.sql
   - include:
       file: db/changelog/0.0.1/changes/03-new_table_citations.sql
+  - include:
+      file: db/changelog/0.0.1/changes/04-new_table_phrases.sql
+  - include:
+      file: db/changelog/0.0.1/changes/05-copy_from_citations_to_phrases.sql
+  - include:
+      file: db/changelog/0.0.1/changes/06-delete_table_citations.sql
+  - include:
+      file: db/changelog/0.0.1/changes/07-new_table_events.sql

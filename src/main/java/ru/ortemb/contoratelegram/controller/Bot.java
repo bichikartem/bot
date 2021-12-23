@@ -14,10 +14,11 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import ru.ortemb.contoratelegram.data.entity.Citations;
+import ru.ortemb.contoratelegram.data.TextType;
+import ru.ortemb.contoratelegram.data.entity.Phrases;
 import ru.ortemb.contoratelegram.data.entity.Users;
 import ru.ortemb.contoratelegram.data.mapper.UsersMapper;
-import ru.ortemb.contoratelegram.data.repository.CitationsRepository;
+import ru.ortemb.contoratelegram.data.repository.PhrasesRepository;
 import ru.ortemb.contoratelegram.data.repository.UserRepository;
 
 @Slf4j
@@ -25,7 +26,7 @@ import ru.ortemb.contoratelegram.data.repository.UserRepository;
 @RequiredArgsConstructor
 public class Bot extends TelegramLongPollingBot {
 
-  private final CitationsRepository citationsRepository;
+  private final PhrasesRepository phrasesRepository;
   private final UserRepository userRepository;
   private final UsersMapper usersMapper;
   @Value("${telegram.bot.credentials.token}")
@@ -80,51 +81,84 @@ public class Bot extends TelegramLongPollingBot {
     return TOKEN;
   }
 
-  @Scheduled(cron = "0 0 10 * * *", zone = "Europe/Moscow")
-//  @Scheduled(cron = "*/10 * * * * *")
-  private void send() {
+  @Scheduled(cron = "0 0 11 * * *", zone = "Europe/Moscow")
+//  @Scheduled(cron = "*/50 * * * * *")
+  private void game() {
 
     Random random = new Random();
-    List<Citations> list = citationsRepository.findAll();
+    List<Phrases> listFooterPhrases = phrasesRepository.findAllByTextType(TextType.FOOTER_ROLL);
+    List<Phrases> listAuthorityPhrases = phrasesRepository.findAllByTextType(TextType.AUTHORITY_ROLL);
+    List<Users> users = userRepository.findAll();
 
-    userRepository.findAll().forEach(user -> {
+    Users authority = users.get(random.nextInt(users.size()));
+    Users footer = users.get(random.nextInt(users.size()));
+
+    users.forEach(user -> {
       try {
-        String text = list.get(random.nextInt(list.size())).getBody();
+        execute(new SendMessage(user.getId(), phrasesRepository.findAllByTextType(TextType.FOOTER_ROLL_START).get(0).getText()));
+      } catch (TelegramApiException e) {
+        log.info("{}. USER {}, ID: {}", e.getMessage(), user.getUserName(), user.getId());
+      }
+    });
+
+    sendPhrases(listFooterPhrases, random, users);
+    users.forEach(user -> {
+      try {
         execute(new SendMessage(user.getId(),
-            String.format("Первая пуля вошла в руку, больно сука...\nВторая в щёку угодила, косой мудила!\n\nТРИ ДНЯ ДО КОРПОРОТИВА!\n\n%s", text)));
+            String.format(phrasesRepository.findAllByTextType(TextType.FOOTER_ROLL_END).get(0).getText() + "%s", footer.getFirstName())));
+        Thread.sleep(10000);
+      } catch (TelegramApiException | InterruptedException e) {
+        log.info("{}. USER {}, ID: {}", e.getMessage(), user.getUserName(), user.getId());
+      }
+    });
+
+    users.forEach(user -> {
+      try {
+        execute(new SendMessage(user.getId(), phrasesRepository.findAllByTextType(TextType.AUTHORITY_ROLL_START).get(0).getText()));
+      } catch (TelegramApiException e) {
+        log.info("{}. USER {}, ID: {}", e.getMessage(), user.getUserName(), user.getId());
+      }
+    });
+
+    sendPhrases(listAuthorityPhrases, random, users);
+    users.forEach(user -> {
+      try {
+        execute(new SendMessage(user.getId(),
+            String.format(authority.getFirstName() + "%s", phrasesRepository.findAllByTextType(TextType.AUTHORITY_ROLL_END).get(0).getText())));
+
+      } catch (TelegramApiException e) {
+        log.info("{}. USER {}, ID: {}", e.getMessage(), user.getUserName(), user.getId());
+      }
+    });
+
+  }
+
+  private void sendPhrases(List<Phrases> listPhrases,Random random, List<Users> users) {
+    try {
+      sendPhrase(listPhrases, random.nextInt(listPhrases.size()), users);
+      Thread.sleep(1000);
+      sendPhrase(listPhrases, random.nextInt(listPhrases.size()), users);
+      Thread.sleep(1000);
+      sendPhrase(listPhrases, random.nextInt(listPhrases.size()), users);
+      Thread.sleep(1000);
+      sendPhrase(listPhrases, random.nextInt(listPhrases.size()), users);
+      Thread.sleep(1000);
+      sendPhrase(listPhrases, random.nextInt(listPhrases.size()), users);
+      Thread.sleep(5000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void sendPhrase(List<Phrases> listPhrases, int number, List<Users> users) {
+    users.stream().forEach(user -> {
+      try {
+          String text = listPhrases.get(number).getText();
+          execute(new SendMessage(user.getId(), text));
       } catch (TelegramApiException e) {
         log.info("{}. USER {}, ID: {}", e.getMessage(), user.getUserName(), user.getId());
       }
     });
   }
 
-  @Scheduled(cron = "0 0 12 * * *", zone = "Europe/Moscow")
-  private void send2() {
-
-    Random random = new Random();
-    List<Citations> list = citationsRepository.findAll();
-
-    userRepository.findAll().forEach(user -> {
-      try {
-        String text = list.get(random.nextInt(list.size())).getBody();
-        execute(new SendMessage(user.getId(),
-            String.format("В Сб. чебурки наобед, а пока го в MarketPlace.\n\n%s", text)));
-      } catch (TelegramApiException e) {
-        log.info("{}. USER {}, ID: {}", e.getMessage(), user.getUserName(), user.getId());
-      }
-    });
-  }
-
-//  @Transactional
-//  @Scheduled(cron = "*/10 * * * * *")
-//  void testSend() {
-////        userRepository.findAll().stream().map(Users::getId).forEach(System.out::println);
-//    SendMessage message = new SendMessage("85248441", "Hi!");
-//    try {
-//      execute(message);
-//    } catch (TelegramApiException e) {
-//      //todo get username
-//      log.info("{}. USER ID: {}", e.getMessage(), message.getChatId());
-//    }
-//  }
 }
