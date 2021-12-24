@@ -17,7 +17,7 @@ import org.hibernate.annotations.DynamicUpdate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Users {
+public class SystemUser {
 
   @Id
   @Column(name = "id")

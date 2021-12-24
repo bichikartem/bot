@@ -1,6 +1,5 @@
 package ru.ortemb.contoratelegram.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -10,13 +9,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.ortemb.contoratelegram.data.TextType;
 import ru.ortemb.contoratelegram.data.entity.Phrases;
-import ru.ortemb.contoratelegram.data.entity.Users;
+import ru.ortemb.contoratelegram.data.entity.SystemUser;
 import ru.ortemb.contoratelegram.data.mapper.UsersMapper;
 import ru.ortemb.contoratelegram.data.repository.PhrasesRepository;
 import ru.ortemb.contoratelegram.data.repository.UserRepository;
@@ -35,18 +35,19 @@ public class Bot extends TelegramLongPollingBot {
   private String BOT_USERNAME;
 
   @Override
+  @Transactional
   public void onUpdateReceived(Update update) {
     if (Objects.nonNull(update.getMessage()) && update.getMessage().hasText()) {
       if (update.getMessage().getText().equals("/start")) {
-        Optional<Users> usersOptional = userRepository.findById(update.getMessage().getFrom().getId().toString());
+        Optional<SystemUser> usersOptional = userRepository.findById(update.getMessage().getFrom().getId().toString());
         if (usersOptional.isPresent()) {
-          Users user = usersOptional.get();
+          SystemUser user = usersOptional.get();
           user.setBlocked(false);
           userRepository.save(user);
           log.info("User id: {} already exists", update.getMessage().getFrom().getId());
           return;
         }
-        Users newUser = userRepository.save(usersMapper.telegramUserToEntity(update.getMessage().getFrom()));
+        SystemUser newUser = userRepository.save(usersMapper.telegramUserToEntity(update.getMessage().getFrom()));
         log.info("New User {}, id: {} has add", newUser.getFirstName(), newUser.getId());
         try {
           execute(new SendMessage(newUser.getId(), String.format("Hi %s", newUser.getFirstName())));
@@ -55,13 +56,17 @@ public class Bot extends TelegramLongPollingBot {
         }
       }
     } else if (Objects.nonNull(update.getMyChatMember()) && update.getMyChatMember().getNewChatMember().getStatus().equals("kicked")) {
-      Optional<Users> optionalUser = userRepository.findById(update.getMyChatMember().getChat().getId().toString());
-      if (optionalUser.isPresent()) {
-        Users user = optionalUser.get();
-        user.setBlocked(true);
-        userRepository.save(user);
-        log.info("USER ID {} BLOCK YOU", user.getId());
-      }
+//      Optional<Users> optionalUser = userRepository.findById(update.getMyChatMember().getChat().getId().toString());
+
+      userRepository.findById(update.getMyChatMember().getChat().getId().toString())
+          .ifPresent(user -> user.setBlocked(true));
+
+//      if (optionalUser.isPresent()) {
+//        Users user = optionalUser.get();
+//        user.setBlocked(true);
+//        userRepository.save(user);
+//        log.info("USER ID {} BLOCK YOU", user.getId());
+//      }
     }
     else if (Objects.nonNull(update.getMyChatMember()) && update.getMyChatMember().getNewChatMember().getStatus().equals("member")) {
       //todo логика когда добавили в чат (id, type, title)
@@ -83,15 +88,15 @@ public class Bot extends TelegramLongPollingBot {
 
   @Scheduled(cron = "0 0 11 * * *", zone = "Europe/Moscow")
 //  @Scheduled(cron = "*/50 * * * * *")
-  private void game() {
+  public void game() {
 
     Random random = new Random();
     List<Phrases> listFooterPhrases = phrasesRepository.findAllByTextType(TextType.FOOTER_ROLL);
     List<Phrases> listAuthorityPhrases = phrasesRepository.findAllByTextType(TextType.AUTHORITY_ROLL);
-    List<Users> users = userRepository.findAll();
+    List<SystemUser> users = userRepository.findAll();
 
-    Users authority = users.get(random.nextInt(users.size()));
-    Users footer = users.get(random.nextInt(users.size()));
+    SystemUser authority = users.get(random.nextInt(users.size()));
+    SystemUser footer = users.get(random.nextInt(users.size()));
 
     users.forEach(user -> {
       try {
@@ -133,7 +138,7 @@ public class Bot extends TelegramLongPollingBot {
 
   }
 
-  private void sendPhrases(List<Phrases> listPhrases,Random random, List<Users> users) {
+  private void sendPhrases(List<Phrases> listPhrases,Random random, List<SystemUser> users) {
     try {
       sendPhrase(listPhrases, random.nextInt(listPhrases.size()), users);
       Thread.sleep(1000);
@@ -150,7 +155,7 @@ public class Bot extends TelegramLongPollingBot {
     }
   }
 
-  private void sendPhrase(List<Phrases> listPhrases, int number, List<Users> users) {
+  private void sendPhrase(List<Phrases> listPhrases, int number, List<SystemUser> users) {
     users.stream().forEach(user -> {
       try {
           String text = listPhrases.get(number).getText();
