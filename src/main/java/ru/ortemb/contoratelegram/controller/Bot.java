@@ -2,78 +2,65 @@ package ru.ortemb.contoratelegram.controller;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.ortemb.contoratelegram.data.TextType;
 import ru.ortemb.contoratelegram.data.entity.Phrases;
 import ru.ortemb.contoratelegram.data.entity.SystemUser;
-import ru.ortemb.contoratelegram.data.mapper.UsersMapper;
 import ru.ortemb.contoratelegram.data.repository.PhrasesRepository;
 import ru.ortemb.contoratelegram.data.repository.UserRepository;
+import ru.ortemb.contoratelegram.service.UserService;
 
 @Slf4j
-@Controller
+@Component
 @RequiredArgsConstructor
 public class Bot extends TelegramLongPollingBot {
 
   private final PhrasesRepository phrasesRepository;
   private final UserRepository userRepository;
-  private final UsersMapper usersMapper;
+  private final UserService userService;
+
   @Value("${telegram.bot.credentials.token}")
   private String TOKEN;
   @Value("${telegram.bot.credentials.bot-username}")
   private String BOT_USERNAME;
 
   @Override
-  @Transactional
   public void onUpdateReceived(Update update) {
     if (Objects.nonNull(update.getMessage()) && update.getMessage().hasText()) {
+
       if (update.getMessage().getText().equals("/start")) {
-        Optional<SystemUser> usersOptional = userRepository.findById(update.getMessage().getFrom().getId().toString());
-        if (usersOptional.isPresent()) {
-          SystemUser user = usersOptional.get();
-          user.setBlocked(false);
-          userRepository.save(user);
-          log.info("User id: {} already exists", update.getMessage().getFrom().getId());
-          return;
-        }
-        SystemUser newUser = userRepository.save(usersMapper.telegramUserToEntity(update.getMessage().getFrom()));
-        log.info("New User {}, id: {} has add", newUser.getFirstName(), newUser.getId());
+        User telegramUser = update.getMessage().getFrom();
+        userService.newUser(telegramUser);
         try {
-          execute(new SendMessage(newUser.getId(), String.format("Hi %s", newUser.getFirstName())));
+          execute(new SendMessage(telegramUser.getId().toString(), String.format("Hi %s", telegramUser.getFirstName())));
         } catch (TelegramApiException e) {
           e.printStackTrace();
         }
       }
+
     } else if (Objects.nonNull(update.getMyChatMember()) && update.getMyChatMember().getNewChatMember().getStatus().equals("kicked")) {
-//      Optional<Users> optionalUser = userRepository.findById(update.getMyChatMember().getChat().getId().toString());
-
-      userRepository.findById(update.getMyChatMember().getChat().getId().toString())
-          .ifPresent(user -> user.setBlocked(true));
-
-//      if (optionalUser.isPresent()) {
-//        Users user = optionalUser.get();
-//        user.setBlocked(true);
-//        userRepository.save(user);
-//        log.info("USER ID {} BLOCK YOU", user.getId());
-//      }
+      userService.userBlocked(update);
     }
+
     else if (Objects.nonNull(update.getMyChatMember()) && update.getMyChatMember().getNewChatMember().getStatus().equals("member")) {
       //todo логика когда добавили в чат (id, type, title)
     }
+
     else if (Objects.nonNull(update.getMyChatMember()) && update.getMyChatMember().getNewChatMember().getStatus().equals("left")) {
       //todo логика когда удалили из чата
     }
+
   }
 
   @Override
