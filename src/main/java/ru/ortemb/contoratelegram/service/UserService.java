@@ -28,7 +28,7 @@ public class UserService {
           log.info("User id: {} already exists", user.getId());
         }, () -> {
           SystemUser newUser = userRepository.save(usersMapper.telegramUserToEntity(telegramUser));
-          log.info("New User {}, id: {} added", newUser.getFirstName(), newUser.getId());
+          log.info("New User {}, id: {} was added", newUser.getFirstName(), newUser.getId());
         });
   }
 
