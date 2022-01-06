@@ -24,7 +24,7 @@ public class DailyRollEvent {
 
     @Scheduled(cron = "0 0 11 * * *", zone = "Europe/Moscow")
 //  @Scheduled(cron = "*/50 * * * * * ")
-  public void event() {
+  public void event() throws InterruptedException {
 
     Random random = new Random();
     List<Phrases> listFooterPhrases = phrasesRepository.findAllByTextType(TextType.FOOTER_ROLL);
@@ -38,12 +38,12 @@ public class DailyRollEvent {
     dailyRollEventService.sendMessage(users, phrasesRepository.findAllByTextType(TextType.FOOTER_ROLL_START).get(0).getText());
     dailyRollEventService.sendPhrases(listFooterPhrases, random, users);
     dailyRollEventService.sendMessage(users,
-        String.format("%s%s", phrasesRepository.findAllByTextType(TextType.FOOTER_ROLL_END).get(0).getText(), footer.getFirstName()));
-
+        String.format("%s %s (@%s)", phrasesRepository.findAllByTextType(TextType.FOOTER_ROLL_END).get(0).getText(), footer.getFirstName(), footer.getUserName()));
+    Thread.sleep(5000);
     dailyRollEventService.sendMessage(users, phrasesRepository.findAllByTextType(TextType.AUTHORITY_ROLL_START).get(0).getText());
     dailyRollEventService.sendPhrases(listAuthorityPhrases, random, users);
     dailyRollEventService.sendMessage(users,
-        String.format("%s%s", authority.getFirstName(), phrasesRepository.findAllByTextType(TextType.AUTHORITY_ROLL_END).get(0).getText()));
+        String.format("%s (@%s) %s", authority.getFirstName(), authority.getUserName(), phrasesRepository.findAllByTextType(TextType.AUTHORITY_ROLL_END).get(0).getText()));
 
   }
 
