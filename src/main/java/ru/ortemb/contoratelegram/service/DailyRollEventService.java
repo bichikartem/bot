@@ -27,15 +27,15 @@ public class DailyRollEventService {
 
   public void sendPhrases(List<Phrases> listPhrases, Random random, List<SystemUser> users) {
     try {
-      sendMessage(users, String.format("4 - %s %s", listPhrases.get(0).getText(), getRandomEmoji(random.nextInt(2))));
+      sendMessage(users, String.format("4 - %s %s", listPhrases.get(0).getText(), getRandomEmoji(random.nextInt(3))));
       Thread.sleep(1000);
-      sendMessage(users, String.format("3 - %s %s", listPhrases.get(1).getText(), getRandomEmoji(random.nextInt(2))));
+      sendMessage(users, String.format("3 - %s %s", listPhrases.get(1).getText(), getRandomEmoji(random.nextInt(3))));
       Thread.sleep(1000);
-      sendMessage(users, String.format("2 - %s %s", listPhrases.get(2).getText(), getRandomEmoji(random.nextInt(2))));
+      sendMessage(users, String.format("2 - %s %s", listPhrases.get(2).getText(), getRandomEmoji(random.nextInt(3))));
       Thread.sleep(1000);
-      sendMessage(users, String.format("1 - %s %s", listPhrases.get(3).getText(), getRandomEmoji(random.nextInt(2))));
+      sendMessage(users, String.format("1 - %s %s", listPhrases.get(3).getText(), getRandomEmoji(random.nextInt(3))));
       Thread.sleep(1000);
-      sendMessage(users, "Испытываем фартуну" + " " + getRandomEmoji(random.nextInt(5)));
+      sendMessage(users, "Испытываем фортуну " + getRandomEmoji(random.nextInt(5)));
       Thread.sleep(500);
       sendDice(users);
       Thread.sleep(5000);
