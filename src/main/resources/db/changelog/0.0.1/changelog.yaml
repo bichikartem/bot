@@ -13,3 +13,5 @@ databaseChangeLog:
       file: db/changelog/0.0.1/changes/06-delete_table_citations.sql
   - include:
       file: db/changelog/0.0.1/changes/07-new_table_events.sql
+  - include:
+      file: db/changelog/0.0.1/changes/08-new_column_events.sql
