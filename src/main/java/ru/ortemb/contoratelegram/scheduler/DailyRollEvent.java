@@ -53,4 +53,18 @@ public class DailyRollEvent {
         true);
   }
 
+  @Scheduled(cron = "0 0 12 * * *", zone = "Europe/Moscow")
+//  @Scheduled(cron = "*/30 * * * * * ")
+  public void QuoteOfDay() {
+
+    List<SystemUser> users = userRepository.findAll().stream().filter(user -> !user.isBlocked()).toList();
+    List<Phrases> listQuotes = phrasesRepository.findAllByTextType(TextType.QUOTE);
+
+    dailyRollEventService.sendMessage(users,
+        String.format("%s\n%s", phrasesRepository.findAllByTextType(TextType.QUOTE_OF_DAY).get(0).getText(),
+            listQuotes.get(random.nextInt(listQuotes.size()))),
+        false);
+
+  }
+
 }

@@ -60,8 +60,7 @@ public class DailyRollEventService {
                 .user(systemUser)
                 .eventsType(eventsType)
                 .count(1)
-                .build())
-        );
+                .build()));
     return systemUser;
   }
 
@@ -72,8 +71,7 @@ public class DailyRollEventService {
             .chatId(user.getId())
             .text(text)
             .disableNotification(disableNotification)
-            .build()
-        );
+            .build());
       } catch (TelegramApiException e) {
         log.info("{}. USER {}, ID: {}", e.getMessage(), user.getUserName(), user.getId());
       }
@@ -83,7 +81,11 @@ public class DailyRollEventService {
   public void sendDice(List<SystemUser> users) {
     users.forEach(user -> {
       try {
-        bot.execute(SendDice.builder().disableNotification(true).chatId(user.getId()).emoji(dice.get(new Random().nextInt(dice.size()))).build());
+        bot.execute(SendDice.builder()
+            .disableNotification(true)
+            .chatId(user.getId())
+            .emoji(dice.get(new Random().nextInt(dice.size())))
+            .build());
       } catch (TelegramApiException e) {
         log.info("{}. USER {}, ID: {}", e.getMessage(), user.getUserName(), user.getId());
       }
