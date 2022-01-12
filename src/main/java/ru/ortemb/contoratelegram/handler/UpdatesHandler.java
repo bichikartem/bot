@@ -74,7 +74,7 @@ public class UpdatesHandler extends TelegramLongPollingBot {
   private void getStat(Update update, EventsType eventsType, String firstRow) {
 
     User telegramUser = update.getMessage().getFrom();
-    List<Events> events = eventsRepository.findFirst10ByEventsTypeOrderByCountDesc(eventsType.name());
+    List<Events> events = eventsRepository.findFirst10ByEventsTypeOrderByCountDesc(eventsType);
     StringBuilder result = new StringBuilder();
     result.append(firstRow);
 

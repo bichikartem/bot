@@ -3,6 +3,8 @@ package ru.ortemb.contoratelegram.data.entity;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -14,6 +16,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
+import ru.ortemb.contoratelegram.data.EventsType;
 
 @Entity(name = "Events")
 @Table(schema = "public", name = "Events")
@@ -38,7 +41,8 @@ public class Events {
   SystemUser user;
 
   @Column(name = "events_type")
-  String eventsType;
+  @Enumerated(EnumType.STRING)
+  EventsType eventsType;
 
   @Column(name = "count")
   Integer count;
