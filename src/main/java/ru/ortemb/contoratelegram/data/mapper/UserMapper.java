@@ -5,7 +5,8 @@ import org.telegram.telegrambots.meta.api.objects.User;
 import ru.ortemb.contoratelegram.data.entity.SystemUser;
 
 @Mapper(componentModel = "spring")
-public interface UsersMapper {
+public interface UserMapper {
 
   SystemUser telegramUserToEntity(User from);
+
 }

@@ -1,15 +1,14 @@
 package ru.ortemb.contoratelegram.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.ortemb.contoratelegram.data.entity.SystemUser;
-import ru.ortemb.contoratelegram.data.mapper.UsersMapper;
+import ru.ortemb.contoratelegram.data.mapper.UserMapper;
 import ru.ortemb.contoratelegram.data.repository.UserRepository;
 
 @Slf4j
@@ -17,8 +16,9 @@ import ru.ortemb.contoratelegram.data.repository.UserRepository;
 @RequiredArgsConstructor
 public class UserService {
 
-  private final UsersMapper usersMapper;
+  private final UserMapper userMapper;
   private final UserRepository userRepository;
+  private  final MessageService messageService;
 
   @Transactional
   public void newUser(User telegramUser) {
@@ -26,8 +26,9 @@ public class UserService {
         .ifPresentOrElse(user -> {
           user.setBlocked(false);
           log.info("User id: {} already exists", user.getId());
+          messageService.sendMessage(List.of(user), String.format("Hi %s", user.getFirstName()),false);
         }, () -> {
-          SystemUser newUser = userRepository.save(usersMapper.telegramUserToEntity(telegramUser));
+          SystemUser newUser = userRepository.save(userMapper.telegramUserToEntity(telegramUser));
           log.info("New User {}, id: {} was added", newUser.getFirstName(), newUser.getId());
         });
   }
@@ -40,5 +41,7 @@ public class UserService {
           log.info("USER ID {} BLOCK YOU", user.getId());
         });
   }
+
+//  public SystemUser
 
 }

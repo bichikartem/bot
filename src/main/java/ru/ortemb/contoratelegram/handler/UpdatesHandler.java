@@ -12,8 +12,8 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.ortemb.contoratelegram.data.EventsType;
-import ru.ortemb.contoratelegram.data.entity.Events;
-import ru.ortemb.contoratelegram.data.repository.EventsRepository;
+import ru.ortemb.contoratelegram.data.entity.Event;
+import ru.ortemb.contoratelegram.data.repository.EventRepository;
 import ru.ortemb.contoratelegram.service.UserService;
 
 @Slf4j
@@ -22,7 +22,7 @@ import ru.ortemb.contoratelegram.service.UserService;
 public class UpdatesHandler extends TelegramLongPollingBot {
 
   private final UserService userService;
-  private final EventsRepository eventsRepository;
+  private final EventRepository eventRepository;
 
   @Value("${telegram.bot.credentials.token}")
   private String TOKEN;
@@ -36,11 +36,6 @@ public class UpdatesHandler extends TelegramLongPollingBot {
       if (update.getMessage().getText().equals("/start")) {
         User telegramUser = update.getMessage().getFrom();
         userService.newUser(telegramUser);
-        try {
-          execute(new SendMessage(telegramUser.getId().toString(), String.format("Hi %s", telegramUser.getFirstName())));
-        } catch (TelegramApiException e) {
-          e.printStackTrace();
-        }
       }
 
       if (update.getMessage().getText().equals("/fufel")) {
@@ -49,6 +44,10 @@ public class UpdatesHandler extends TelegramLongPollingBot {
 
       if (update.getMessage().getText().equals("/authority")) {
         getStat(update, EventsType.AUTHORITY, "Результаты ✊ АВТОРИТЕТ дня: \n");
+      }
+
+      if (update.getMessage().getText().equals("/quote")) {
+
       }
 
     } else if (Objects.nonNull(update.getMyChatMember()) && update.getMyChatMember().getNewChatMember().getStatus().equals("kicked")) {
@@ -74,12 +73,12 @@ public class UpdatesHandler extends TelegramLongPollingBot {
   private void getStat(Update update, EventsType eventsType, String firstRow) {
 
     User telegramUser = update.getMessage().getFrom();
-    List<Events> events = eventsRepository.findFirst10ByEventsTypeOrderByCountDesc(eventsType);
+    List<Event> events = eventRepository.findFirst10ByEventsTypeOrderByCountDesc(eventsType);
     StringBuilder result = new StringBuilder();
     result.append(firstRow);
 
     for (int i = 0; i < events.size(); i++) {
-      Events ev = events.get(i);
+      Event ev = events.get(i);
       result.append(String.format("%s)  %s (@%s) - %s раз(а) \n", i + 1, ev.getUser().getFirstName(), ev.getUser().getUserName(), ev.getCount()));
     }
     try {

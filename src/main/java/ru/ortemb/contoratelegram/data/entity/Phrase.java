@@ -20,7 +20,7 @@ import ru.ortemb.contoratelegram.data.TextType;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Phrases {
+public class Phrase {
 
   @Id
   @Column(name = "id")
