@@ -15,6 +15,7 @@ import ru.ortemb.contoratelegram.data.EventsType;
 import ru.ortemb.contoratelegram.data.TextType;
 import ru.ortemb.contoratelegram.data.entity.Event;
 import ru.ortemb.contoratelegram.data.entity.SystemUser;
+import ru.ortemb.contoratelegram.data.mapper.UserMapper;
 import ru.ortemb.contoratelegram.data.repository.EventRepository;
 import ru.ortemb.contoratelegram.data.repository.UserRepository;
 import ru.ortemb.contoratelegram.service.MessageService;
@@ -30,7 +31,7 @@ public class UpdatesHandler extends TelegramLongPollingBot {
   private final EventRepository eventRepository;
   private final PhraseService phraseService;
   private final MessageService messageService;
-  private final UserRepository userRepository;
+  private final UserMapper userMapper;
 
   @Value("${telegram.bot.credentials.token}")
   private String TOKEN;
@@ -55,8 +56,7 @@ public class UpdatesHandler extends TelegramLongPollingBot {
       }
 
       if (update.getMessage().getText().equals("/quote")) {
-        List<SystemUser> users = userRepository.findAll().stream().filter(user -> !user.isBlocked()).toList();
-        messageService.sendMessage(users, phraseService.getRandomPhrase(TextType.QUOTE), false);
+        messageService.sendMessage(List.of(userMapper.telegramUserToEntity(update.getMessage().getFrom())), phraseService.getRandomPhrase(TextType.QUOTE), false);
       }
 
     } else if (Objects.nonNull(update.getMyChatMember()) && update.getMyChatMember().getNewChatMember().getStatus().equals("kicked")) {
