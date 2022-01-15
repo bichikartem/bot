@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -45,6 +44,7 @@ public class UserService {
           log.info("USER ID {} BLOCK YOU", user.getId());
         });
   }
+
   public LinkedList<SystemUser> getSomeRandomUsers(long amount) {
     List<SystemUser> users = userRepository.findAllByIsBlocked(false);
     if (users.size() < amount){
