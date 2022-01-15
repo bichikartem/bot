@@ -1,7 +1,5 @@
 package ru.ortemb.contoratelegram.service;
 
-import java.util.List;
-import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
@@ -12,6 +10,9 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.ortemb.contoratelegram.data.entity.SystemUser;
 
+import java.util.List;
+import java.util.Random;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Lazy))
@@ -20,14 +21,26 @@ public class MessageService {
   private final TelegramLongPollingBot bot;
   private final List<String> dice = List.of("🎲", "🎯", "🏀", "⚽", "🎰", "🎳");
 
+  public void sendMessage(String userId, String text, boolean disableNotification) {
+      try {
+        bot.execute(SendMessage.builder()
+            .chatId(userId)
+            .text(text)
+            .disableNotification(disableNotification)
+            .build());
+      } catch (TelegramApiException e) {
+        log.info("{}. USER ID: {}", e.getMessage(), userId);
+      }
+  }
+
   public void sendMessage(List<SystemUser> users, String text, boolean disableNotification) {
     users.forEach(user -> {
       try {
         bot.execute(SendMessage.builder()
-            .chatId(user.getId())
-            .text(text)
-            .disableNotification(disableNotification)
-            .build());
+                .chatId(user.getId())
+                .text(text)
+                .disableNotification(disableNotification)
+                .build());
       } catch (TelegramApiException e) {
         log.info("{}. USER {}, ID: {}", e.getMessage(), user.getUserName(), user.getId());
       }

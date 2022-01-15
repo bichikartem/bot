@@ -1,7 +1,5 @@
 package ru.ortemb.contoratelegram.handler;
 
-import java.util.List;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,13 +12,13 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.ortemb.contoratelegram.data.EventsType;
 import ru.ortemb.contoratelegram.data.TextType;
 import ru.ortemb.contoratelegram.data.entity.Event;
-import ru.ortemb.contoratelegram.data.entity.SystemUser;
-import ru.ortemb.contoratelegram.data.mapper.UserMapper;
 import ru.ortemb.contoratelegram.data.repository.EventRepository;
-import ru.ortemb.contoratelegram.data.repository.UserRepository;
 import ru.ortemb.contoratelegram.service.MessageService;
 import ru.ortemb.contoratelegram.service.PhraseService;
 import ru.ortemb.contoratelegram.service.UserService;
+
+import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Component
@@ -31,7 +29,6 @@ public class UpdatesHandler extends TelegramLongPollingBot {
   private final EventRepository eventRepository;
   private final PhraseService phraseService;
   private final MessageService messageService;
-  private final UserMapper userMapper;
 
   @Value("${telegram.bot.credentials.token}")
   private String TOKEN;
@@ -43,20 +40,20 @@ public class UpdatesHandler extends TelegramLongPollingBot {
     if (Objects.nonNull(update.getMessage()) && update.getMessage().hasText()) {
 
       if (update.getMessage().getText().equals("/start")) {
-        User telegramUser = update.getMessage().getFrom();
-        userService.newUser(telegramUser);
+        userService.newUser(update.getMessage().getFrom());
       }
 
       if (update.getMessage().getText().equals("/fufel")) {
-        getStat(update, EventsType.FOOTER, "Результаты 🙀 ФУФЛЫЖНИК дня: \n");
+        getStat(update, EventsType.FOOTER, phraseService.getRandomPhrase(TextType.FOOTER_ROLL_RESULTS));
       }
 
       if (update.getMessage().getText().equals("/authority")) {
-        getStat(update, EventsType.AUTHORITY, "Результаты ✊ АВТОРИТЕТ дня: \n");
+        getStat(update, EventsType.AUTHORITY, phraseService.getRandomPhrase(TextType.AUTHORITY_ROLL_RESULTS));
       }
 
       if (update.getMessage().getText().equals("/quote")) {
-        messageService.sendMessage(List.of(userMapper.telegramUserToEntity(update.getMessage().getFrom())), phraseService.getRandomPhrase(TextType.QUOTE), false);
+        String userId = update.getMessage().getFrom().getId().toString();
+        messageService.sendMessage(userId, phraseService.getRandomPhrase(TextType.QUOTE), false);
       }
 
     } else if (Objects.nonNull(update.getMyChatMember()) && update.getMyChatMember().getNewChatMember().getStatus().equals("kicked")) {

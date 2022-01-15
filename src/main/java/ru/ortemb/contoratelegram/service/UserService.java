@@ -1,6 +1,10 @@
 package ru.ortemb.contoratelegram.service;
 
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,7 +30,7 @@ public class UserService {
         .ifPresentOrElse(user -> {
           user.setBlocked(false);
           log.info("User id: {} already exists", user.getId());
-          messageService.sendMessage(List.of(user), String.format("Hi %s", user.getFirstName()),false);
+          messageService.sendMessage(user.getId(), String.format("Hi %s", user.getFirstName()),false);
         }, () -> {
           SystemUser newUser = userRepository.save(userMapper.telegramUserToEntity(telegramUser));
           log.info("New User {}, id: {} was added", newUser.getFirstName(), newUser.getId());
@@ -41,7 +45,16 @@ public class UserService {
           log.info("USER ID {} BLOCK YOU", user.getId());
         });
   }
-
-//  public SystemUser
+  public LinkedList<SystemUser> getSomeRandomUsers(long amount) {
+    List<SystemUser> users = userRepository.findAllByIsBlocked(false);
+    if (users.size() < amount){
+      throw new RuntimeException("The amount of users is less than necessary");
+    } else {
+      Collections.shuffle(users);
+      return users.stream()
+              .limit(amount)
+              .collect(Collectors.toCollection(LinkedList::new));
+    }
+  }
 
 }

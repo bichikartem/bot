@@ -14,9 +14,8 @@ import ru.ortemb.contoratelegram.data.repository.PhraseRepository;
 @RequiredArgsConstructor
 public class PhraseService {
 
-  private final PhraseRepository phraseRepository;
-
   private final Random random = new Random();
+  private final PhraseRepository phraseRepository;
 
   public String getPhrase(TextType textType) {
     return phraseRepository.findByTextType(textType).getText();

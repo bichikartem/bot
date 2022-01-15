@@ -27,7 +27,7 @@ public class DailyEventService {
   private final MessageService messageService;
   private final EventRepository eventRepository;
 
-  public void sendPhrases(TextType textType, List<SystemUser> users) {
+  public void sendPhrases(List<SystemUser> users, TextType textType) {
     try {
       messageService.sendMessage(users, String.format("4 - %s %s", quoteService.getRandomPhrase(textType), getRandomEmoji(random.nextInt(3))), true);
       Thread.sleep(1200);
@@ -47,16 +47,15 @@ public class DailyEventService {
   }
 
   @Transactional
-  public SystemUser getRandomUserAndChangeStat(List<SystemUser> users, EventsType eventsType) {
-    SystemUser systemUser = users.get(random.nextInt(users.size()));
+  public SystemUser changeStat(SystemUser systemUser, EventsType eventsType) {
     eventRepository.findByUserIdAndEventsType(systemUser.getId(), eventsType)
         .ifPresentOrElse(
-            event -> event.setCount(event.getCount() + 1),
-            () -> eventRepository.save(Event.builder()
-                .user(systemUser)
-                .eventsType(eventsType)
-                .count(1)
-                .build()));
+          event -> event.setCount(event.getCount() + 1),
+          () -> eventRepository.save(Event.builder()
+              .user(systemUser)
+              .eventsType(eventsType)
+              .count(1)
+              .build()));
     return systemUser;
   }
 
