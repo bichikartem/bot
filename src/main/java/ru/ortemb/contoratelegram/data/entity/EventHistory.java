@@ -25,7 +25,7 @@ import ru.ortemb.contoratelegram.data.EventsType;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Event {
+public class EventHistory {
 
   @Id
   @GeneratedValue(generator = "UUID")

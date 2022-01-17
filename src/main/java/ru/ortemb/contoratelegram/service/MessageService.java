@@ -22,15 +22,15 @@ public class MessageService {
   private final List<String> dice = List.of("🎲", "🎯", "🏀", "⚽", "🎰", "🎳");
 
   public void sendMessage(String userId, String text, boolean disableNotification) {
-      try {
-        bot.execute(SendMessage.builder()
-            .chatId(userId)
-            .text(text)
-            .disableNotification(disableNotification)
-            .build());
-      } catch (TelegramApiException e) {
-        log.info("{}. USER ID: {}", e.getMessage(), userId);
-      }
+    try {
+      bot.execute(SendMessage.builder()
+          .chatId(userId)
+          .text(text)
+          .disableNotification(disableNotification)
+          .build());
+    } catch (TelegramApiException e) {
+      log.info("{}. USER ID: {}", e.getMessage(), userId);
+    }
   }
 
   public void sendMessage(List<SystemUser> users, String text, boolean disableNotification) {

@@ -5,7 +5,7 @@ import ru.ortemb.contoratelegram.data.entity.SystemUser;
 
 import java.util.List;
 
-public interface UserRepository extends JpaRepository<SystemUser, String> {
+public interface SystemUserRepository extends JpaRepository<SystemUser, String> {
 
   List<SystemUser> findAllByIsBlocked(boolean isBlocked);
 

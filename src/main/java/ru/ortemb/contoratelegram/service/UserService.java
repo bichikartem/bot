@@ -8,11 +8,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import ru.ortemb.contoratelegram.data.entity.SystemUser;
 import ru.ortemb.contoratelegram.data.mapper.UserMapper;
-import ru.ortemb.contoratelegram.data.repository.UserRepository;
+import ru.ortemb.contoratelegram.data.repository.SystemUserRepository;
 
 @Slf4j
 @Service
@@ -20,25 +19,25 @@ import ru.ortemb.contoratelegram.data.repository.UserRepository;
 public class UserService {
 
   private final UserMapper userMapper;
-  private final UserRepository userRepository;
   private  final MessageService messageService;
+  private final SystemUserRepository systemUserRepository;
 
   @Transactional
-  public void newUser(User telegramUser) {
-    userRepository.findById(telegramUser.getId().toString())
+  public void createUser(User telegramUser) {
+    systemUserRepository.findById(telegramUser.getId().toString())
         .ifPresentOrElse(user -> {
           user.setBlocked(false);
           log.info("User id: {} already exists", user.getId());
           messageService.sendMessage(user.getId(), String.format("Hi %s", user.getFirstName()),false);
         }, () -> {
-          SystemUser newUser = userRepository.save(userMapper.telegramUserToEntity(telegramUser));
+          SystemUser newUser = systemUserRepository.save(userMapper.telegramUserToEntity(telegramUser));
           log.info("New User {}, id: {} was added", newUser.getFirstName(), newUser.getId());
         });
   }
 
   @Transactional
-  public void userBlocked(Update update) {
-    userRepository.findById(update.getMyChatMember().getChat().getId().toString())
+  public void userBlocked(String userId) {
+    systemUserRepository.findById(userId)
         .ifPresent(user -> {
           user.setBlocked(true);
           log.info("USER ID {} BLOCK YOU", user.getId());
@@ -46,7 +45,7 @@ public class UserService {
   }
 
   public LinkedList<SystemUser> getSomeRandomUsers(long amount) {
-    List<SystemUser> users = userRepository.findAllByIsBlocked(false);
+    List<SystemUser> users = systemUserRepository.findAllByIsBlocked(false);
     if (users.size() < amount){
       throw new RuntimeException("The amount of users is less than necessary");
     } else {
@@ -55,6 +54,10 @@ public class UserService {
               .limit(amount)
               .collect(Collectors.toCollection(LinkedList::new));
     }
+  }
+
+  public List<SystemUser> getAllActiveUsers() {
+    return systemUserRepository.findAllByIsBlocked(false);
   }
 
 }
