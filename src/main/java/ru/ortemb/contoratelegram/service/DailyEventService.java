@@ -5,7 +5,7 @@ import com.vdurmont.emoji.EmojiManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.ortemb.contoratelegram.data.EventsType;
+import ru.ortemb.contoratelegram.data.EventType;
 import ru.ortemb.contoratelegram.data.TextType;
 import ru.ortemb.contoratelegram.data.entity.SystemUser;
 import java.util.ArrayList;
@@ -29,8 +29,8 @@ public class DailyEventService {
     List<SystemUser> users = userService.getAllActiveUsers();
     LinkedList<SystemUser> selectedUsers = userService.getSomeRandomUsers(2);
 
-    SystemUser authority = eventHistoryService.changeStat(selectedUsers.poll(), EventsType.AUTHORITY);
-    SystemUser footer = eventHistoryService.changeStat(selectedUsers.poll(), EventsType.FOOTER);
+    SystemUser authority = eventHistoryService.changeStat(selectedUsers.poll(), EventType.AUTHORITY);
+    SystemUser footer = eventHistoryService.changeStat(selectedUsers.poll(), EventType.FOOTER);
 
     messageService.sendMessage(users, phraseService.getPhrase(TextType.FOOTER_ROLL_START), false);
     Thread.sleep(2000);
@@ -49,8 +49,7 @@ public class DailyEventService {
   }
 
   public void startQuoteOfDay() {
-    List<SystemUser> users = userService.getAllActiveUsers();
-    messageService.sendMessage(users,
+    messageService.sendMessage(userService.getAllActiveUsers(),
         String.format("%s\n%s", phraseService.getPhrase(TextType.QUOTE_OF_DAY),
             phraseService.getRandomPhrase(TextType.QUOTE)),
         false);

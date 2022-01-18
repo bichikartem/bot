@@ -16,7 +16,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
-import ru.ortemb.contoratelegram.data.EventsType;
+import ru.ortemb.contoratelegram.data.EventType;
 
 @Entity(name = "Events")
 @Table(schema = "public", name = "Events")
@@ -42,7 +42,7 @@ public class EventHistory {
 
   @Column(name = "events_type")
   @Enumerated(EnumType.STRING)
-  EventsType eventsType;
+  EventType eventType;
 
   @Column(name = "count")
   Integer count;

@@ -1,6 +1,6 @@
 package ru.ortemb.contoratelegram.data;
 
-public enum EventsType {
+public enum EventType {
   AUTHORITY,
   FOOTER
 }
